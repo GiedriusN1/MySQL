@@ -1,0 +1,19 @@
+Užduotys
+1. Padidinkite visiems darbuotojams paskutinius (t.y. vis dar siai dienai aktyvius) atlyginimus 10%
+2. Atitinkami juos sumazinkite tokiu pricentu, kad gautumet senas reiksmes :slightly_smiling_face:
+3. Suskaiciuokite kiek buvo darbuotoju , t.y. gaunanciu atlyginima 1989-12-31
+
+Sprendimas 1:
+SELECT * FROM employees.salaries WHERE to_date = '9999-01-01';
+-- Patikrinam pradine busena: '10001', '88958', '2002-06-22', '9999-01-01'
+
+UPDATE salaries SET salary = (salary * 1.1) WHERE to_date = '9999-01-01';
+SELECT * FROM employees.salaries WHERE to_date = '9999-01-01';
+-- Patikrinam kaip pasikeite: '10001', '97854', '2002-06-22', '9999-01-01'
+
+Sprendimas 2:
+UPDATE salaries SET salary = (salary * 1/1.1) WHERE to_date = '9999-01-01';
+SELECT * FROM employees.salaries WHERE to_date = '9999-01-01';
+-- Patikrinam kaip pasikeite i pradine busena: '10001', '88958', '2002-06-22', '9999-01-01'
+
+Sprendimas 3:
