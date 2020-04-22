@@ -1,19 +1,30 @@
-Užduotys
+Užduotys (testinė db employees)
 1. Padidinkite visiems darbuotojams paskutinius (t.y. vis dar siai dienai aktyvius) atlyginimus 10%
 2. Atitinkami juos sumazinkite tokiu pricentu, kad gautumet senas reiksmes :slightly_smiling_face:
 3. Suskaiciuokite kiek buvo darbuotoju , t.y. gaunanciu atlyginima 1989-12-31
 
-Sprendimas 1:
+Sprendimas 1: (reikia išjungti safe mode nustatymuose kad leistų keisti neliečiant key stulpelio)
+-- Patikrinam pradine busena:
 SELECT * FROM employees.salaries WHERE to_date = '9999-01-01';
--- Patikrinam pradine busena: '10001', '88958', '2002-06-22', '9999-01-01'
+-- gaunam '10001', '88958', '2002-06-22', '9999-01-01'
 
+-- didinam atlyginimus 10 proc.:
 UPDATE salaries SET salary = (salary * 1.1) WHERE to_date = '9999-01-01';
+-- Patikrinam kaip pasikeite: 
 SELECT * FROM employees.salaries WHERE to_date = '9999-01-01';
--- Patikrinam kaip pasikeite: '10001', '97854', '2002-06-22', '9999-01-01'
+-- gaunam '10001', '97854', '2002-06-22', '9999-01-01'
 
 Sprendimas 2:
+
+-- mazinam atlyginimus koeficientu (1 / 1.1): 
 UPDATE salaries SET salary = (salary * 1/1.1) WHERE to_date = '9999-01-01';
+-- Patikrinam kaip pasikeite i pradine busena: 
 SELECT * FROM employees.salaries WHERE to_date = '9999-01-01';
--- Patikrinam kaip pasikeite i pradine busena: '10001', '88958', '2002-06-22', '9999-01-01'
+-- gaunam '10001', '88958', '2002-06-22', '9999-01-01'
 
 Sprendimas 3:
+SELECT COUNT(*) FROM salaries 
+WHERE '1989-12-31' BETWEEN from_date AND to_date;
+
+-- gaunam '95447'
+
