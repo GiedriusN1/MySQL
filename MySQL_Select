@@ -1,0 +1,39 @@
+SELECT COUNT(*) FROM salaries;
+SELECT COUNT(*) FROM salaries WHERE salary > 100000;
+SELECT COUNT(*) FROM departments;
+SELECT * FROM departments; 
+/* 
+	komentaras galintis eiti per keleta eiluciu
+*/
+-- komentaras vienoje eiluteje kaip kitur //
+-- Pries tai reikia nuimti departamento pavadinime NOT NULL ir UNIQ atributus
+INSERT departments(dept_no,dept_name) VALUES('x',NULL);
+-- suskaiciuojame kiek yra irasu kur 'dept_name' turi reiksme
+SELECT COUNT(dept_name) FROM departments;
+-- ivedame departamenta su egzistuojanciu pavadinimu:
+INSERT departments(dept_no,dept_name) VALUES('x2','Production');
+INSERT departments(dept_no,dept_name) VALUES('x3','Production');
+-- suskaiciuojame kiek yra irasu kur 'dept_name' turi skirtingas ne null reiksmes
+SELECT COUNT(DISTINCT dept_name) FROM departments;
+-- parodyti 50 employee irasu praleidziant 950, t.y pradedant nuo 951 iki 960
+SELECT * FROM employees LIMIT 950, 10;
+SELECT * FROM employees LIMIT 10 OFFSET 950;
+-- parodyti sulygiuotus pagal varda (mazejimo tvarka) ir pavarde
+-- ir isrinktus tokius, kad pavarde prasideda 'Za' ir vardas >= 'B'
+SELECT emp_no, last_name, first_name 
+FROM employees 
+WHERE last_name LIKE 'Za%' AND first_name >= 'B'   
+ORDER BY first_name DESC, last_name 
+LIMIT 10 OFFSET 950;
+/*
+	Salaries:
+		emp_no 	date_from	date_to		salary
+        1		1990-01-01	1990-03-15	1000
+        1		1990-03-15	1990-12-01	1500
+*/
+-- noriu suskaiciuoti kiek yra salary irasu 1990-01-15
+-- uztruko > 5s
+SELECT COUNT(*) FROM salaries 
+WHERE '1990-01-15' BETWEEN from_date AND to_date;	
+-- reikia sukurti indeksa su stulpeliais from_date ir to_date
+ALTER TABLE salaries ADD INDEX INDEX_Date_Range (from_date,to_date)
