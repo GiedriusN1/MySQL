@@ -1,0 +1,122 @@
+Uždaviniai:
+1) Suraskite kokiu metų laiku (pavasarį, vasarą, rudenį ar žiemą) įdarbinta daugiausia žmonių
+2) Išveskite tris daugiausia progresavusius atlyginimo prasme žmones, t.y. kurių pirmas ir paskutinis atlyginimai daugiausia skyrėsi
+3) Raskite žmogų kurio vienas iš atlyginimo pakeitimų buvo didžiausias (pats pakeitimas buvo didžiausias, t.y. pvz anktesnis buvo 100, o dabar 150 tai tada pakeitimas 50)
+
+subquery and with dokumentacija:
+https://dev.mysql.com/doc/refman/8.0/en/subqueries.html
+https://dev.mysql.com/doc/refman/8.0/en/with.html (edited) 
+
+SELECT * FROM departments;
+-- 1) Isvesti kiek darbuotoju dirba d008 skyriuje: 
+SELECT COUNT(*) FROM dept_emp 
+WHERE dept_no = 'd008' AND 
+	CURDATE() BETWEEN from_date AND DATE_SUB(to_date, INTERVAL 1 DAY);
+-- 2) Isvesti kiek darbuotoju dirba kiekviename skyriuje:
+/*
+	dept_emp:
+    dept_no	emp_no	from_date	to_date
+    d001	100		2020-01-01	2020-02-01
+	d001	 99		2020-01-01	9999-01-01
+    d008	100		2020-02-01	9999-01-01
+    d008	101		2020-01-01	9999-01-01
+	d008	102		2019-01-01	9999-01-01
+    d003	120		2016-01-01	9999-01-01
+    d003	199		2015-12-01	9999-01-01
+	norisi gauti:
+    d001	1
+    d008	3
+    d003	2
+*/
+SELECT dept_no, COUNT(*) FROM dept_emp 
+WHERE CURDATE() BETWEEN from_date AND DATE_SUB(to_date, INTERVAL 1 DAY)
+GROUP BY dept_no;
+-- 3) Isveskite darbuotoju vardus ir kiek darbuotoju su tokiu pat vardu
+SELECT first_name, COUNT(*) AS count FROM employees 
+GROUP BY first_name; 
+-- 3) Isveskite darbuotoju vardus ir kiek darbuotoju su tokiu pat vardu
+--    tik sulygiuotus pagal pasikartojimo skaiciu ir po to pagal varda
+SELECT first_name, COUNT(*) AS count FROM employees 
+GROUP BY first_name
+ORDER BY count, first_name 
+LIMIT 10;
+-- 4) tas pats kas 3, tik reikia isvesti tokiu irasus kuriu pasikartomijo 
+--    skaicius didesnis uz 200
+SELECT first_name, COUNT(*) AS count FROM employees 
+GROUP BY first_name
+HAVING count > 200
+ORDER BY count, first_name 
+LIMIT 10;
+-- 5) isvesti darbuotojus (t.y. ju id) su paskaiciuotu ju vidutiniu atlyginimu
+--    to atlyginimo mazejimo tvarka
+SELECT emp_no, AVG(salary) AS avgsal FROM salaries 
+GROUP BY emp_no 
+ORDER BY avgsal DESC LIMIT 10; 
+-- 6) tas pats kaip 5 tik dar norim kad isvestiu darbuotojo varda ir pavarde
+SELECT s.emp_no, first_name, last_name, AVG(salary) AS avgsal 
+FROM salaries s -- galima rasyti be AS
+INNER JOIN employees AS e ON e.emp_no = s.emp_no
+GROUP BY emp_no 
+ORDER BY avgsal DESC LIMIT 10;
+/*
+	salaries:	
+    emp_no	salary
+    100		1000
+    100		1200
+    101		1500
+    199		9000
+    employees:
+    emp_no	name
+    100		Jonas
+    101		Petras
+    102		Antanas
+    1) SELECT * FROM salary s INNER JOIN employees e ON e.emp_no = s.emp_no
+    resultatas:
+    emp_no	salary	emp_no	name
+    100		1000	100		Jonas
+    100		1200	100		Jonas
+    101		1500	101		Petras
+    2) SELECT * FROM employees e INNER JOIN salaries s ON e.emp_no = s.emp_no
+	resultatas:
+    emp_no	name	emp_no	salary
+    100		Jonas	100		1000
+    100		Jonas	100		1200
+    101		Petras	101		1500
+    3) SELECT * FROM employees e LEFT JOIN salaries s ON e.emp_no = s.emp_no
+    resultatas:
+    emp_no	name	emp_no	salary
+    100		Jonas	100		1000
+    100		Jonas	100		1200
+    101		Petras	101		1500
+    102		Antanas	null	null
+    3) SELECT * FROM employees e RIGHT JOIN salaries s ON e.emp_no = s.emp_no
+    resultatas:
+    emp_no	name	emp_no	salary
+    100		Jonas	100		1000
+    100		Jonas	100		1200
+    101		Petras	101		1500
+	null	null	199		9000
+*/
+SELECT COUNT(*) FROM salaries;
+SELECT COUNT(*) FROM employees;
+SELECT COUNT(*) FROM salaries, employees;
+SELECT COUNT(*) FROM salaries, employees
+WHERE salary > 100000 AND salaries.emp_no = employees.emp_no AND salary < 110000;
+SELECT COUNT(*) FROM salaries
+JOIN employees ON salaries.emp_no = employees.emp_no
+WHERE salary > 100000 AND salary < 110000;
+-- 7) Isvesti visus padalinius (kodas ir pavadinimas) su dirbanciuju dabar skaiciumi
+SELECT d.dept_no, d.dept_name, COUNT(*) AS emp_count
+FROM departments d
+JOIN dept_emp de ON de.dept_no = d.dept_no AND 
+	CURDATE() BETWEEN from_date AND DATE_SUB(to_date, INTERVAL 1 DAY)
+GROUP BY d.dept_no -- , d.dept_name - galima bet nebutina grupuoti pagal 
+ORDER BY d.dept_name;
+-- 8) tas pats kas 7 bet norisi matyti visus padalinius, net ir tuos kur nera darbuotoju
+SELECT d.dept_no, de.dept_no, d.dept_name, COUNT(de.dept_no) AS emp_count
+FROM departments d
+LEFT JOIN dept_emp de ON de.dept_no = d.dept_no AND 
+	CURDATE() BETWEEN from_date AND DATE_SUB(to_date, INTERVAL 1 DAY)
+GROUP BY d.dept_no -- , d.dept_name - galima bet nebutina grupuoti pagal 
+ORDER BY d.dept_name;
+
