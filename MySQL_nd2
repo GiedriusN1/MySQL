@@ -3,6 +3,23 @@ Uždaviniai:
 2) Išveskite tris daugiausia progresavusius atlyginimo prasme žmones, t.y. kurių pirmas ir paskutinis atlyginimai daugiausia skyrėsi
 3) Raskite žmogų kurio vienas iš atlyginimo pakeitimų buvo didžiausias (pats pakeitimas buvo didžiausias, t.y. pvz anktesnis buvo 100, o dabar 150 tai tada pakeitimas 50)
 
+Sprendimas 1
+SELECT daugiausia_priimta
+FROM (SELECT CASE WHEN MONTH(hire_date) between 3 and 5 THEN '  pavasari'
+     WHEN MONTH(hire_date) between 6 and 8 then '  vasara'
+     WHEN MONTH(hire_date) between 9 and 11 then '  rudeni'
+     WHEN MONTH(hire_date) >= 12 OR MONTH(hire_date) <= 2 then '  ziema'
+     END AS daugiausia_priimta, COUNT(hire_date) kiekis
+
+FROM employees
+GROUP BY daugiausia_priimta 
+ORDER BY kiekis DESC) selektas
+LIMIT 1;
+
+
+
+
+
 subquery and with dokumentacija:
 https://dev.mysql.com/doc/refman/8.0/en/subqueries.html
 https://dev.mysql.com/doc/refman/8.0/en/with.html (edited) 
@@ -17,10 +34,10 @@ WHERE dept_no = 'd008' AND
 	dept_emp:
     dept_no	emp_no	from_date	to_date
     d001	100		2020-01-01	2020-02-01
-	d001	 99		2020-01-01	9999-01-01
+    d001	 99		2020-01-01	9999-01-01
     d008	100		2020-02-01	9999-01-01
     d008	101		2020-01-01	9999-01-01
-	d008	102		2019-01-01	9999-01-01
+    d008	102		2019-01-01	9999-01-01
     d003	120		2016-01-01	9999-01-01
     d003	199		2015-12-01	9999-01-01
 	norisi gauti:
