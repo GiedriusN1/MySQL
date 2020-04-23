@@ -4,18 +4,35 @@ Uždaviniai:
 3) Raskite žmogų kurio vienas iš atlyginimo pakeitimų buvo didžiausias (pats pakeitimas buvo didžiausias, t.y. pvz anktesnis buvo 100, o dabar 150 tai tada pakeitimas 50)
 
 Sprendimas 1
-SELECT daugiausia_priimta
+SELECT daugiausia_idarbinta
 FROM (SELECT CASE WHEN MONTH(hire_date) between 3 and 5 THEN '  pavasari'
      WHEN MONTH(hire_date) between 6 and 8 then '  vasara'
      WHEN MONTH(hire_date) between 9 and 11 then '  rudeni'
      WHEN MONTH(hire_date) >= 12 OR MONTH(hire_date) <= 2 then '  ziema'
-     END AS daugiausia_priimta, COUNT(hire_date) kiekis
+     END AS daugiausia_idarbinta, COUNT(hire_date) kiekis
 
 FROM employees
-GROUP BY daugiausia_priimta 
+GROUP BY daugiausia_idarbinta 
 ORDER BY kiekis DESC) selektas
 LIMIT 1;
 
+Sprendimas 2
+a) lyginam pagal didziausio ir maziausio atlyginimu skirtuma (ne visiskai atitinka uzduoties salyga)
+
+SELECT  s.emp_no, first_name, last_name, MAX(s.salary) maxsal, MIN(s.salary)  minsal, MAX(salary) - MIN(salary) skirtumas
+FROM salaries s
+INNER JOIN employees AS e ON e.emp_no = s.emp_no
+GROUP BY emp_no 
+ORDER BY skirtumas DESC
+LIMIT 3;
+
+Gaunam:
+43145	Fumino		Frijda	96389	42514	53875
+204805	Nimmagadda	Crouzet	105159	51734	53425
+446888	Ishfaq		Iisaku	106794	53533	53261
+
+
+b) lyginam pagal dabartinio ir pirmo atlyginimu skirtuma
 
 
 
