@@ -64,8 +64,24 @@ WHERE salaries.emp_no = SOD.emp_no order by salaries.from_date asc limit 1) AS s
 FROM salaries SOD group by SOD.emp_no) select emp, 
 (s2-s1) as dis from sal order by dis desc limit 1;
 
+
+bet geriau su DISTINCT:
+
+with sal (emp,s1,s2) as( SELECT DISCTINCT emp_no, 
+(SELECT salary FROM salaries WHERE salaries.emp_no = SOD.emp_no order by salaries.from_date asc limit 1) AS s1, 
+(SELECT salary FROM salaries WHERE salaries.emp_no = SOD.emp_no order by salaries.from_date desc limit 1) AS s2 
+FROM salaries SOD 
+--group by SOD.emp_no) 
+select emp, (s2-s1) as dis from sal 
+order by dis desc limit 1;
+
+
+
 Sprendimas 3:
 
+karolio (nereikalingas cross join):
+select a.emp_no, a.salary,b.salary,(a.salary-b.salary) as skirtumas from salaries a 
+cross join salaries b where a.emp_no=b.emp_no group by skirtumas order by skirtumas desc limit 1;
 
 
 subquery and with dokumentacija:
