@@ -1,0 +1,118 @@
+Paprasti uždaviniai:
+Rasti:
+* kuriame departamente dabar dirba daugiausiai moterų -> departamento pavadinimas ir moterų skaičius
+
+
+
+
+* kuriame departamente vis dar dirba vyriausias darbuotojas -> departamento pavadinimas, darbuotojo vardas, pavarde
+* kuriame departamente algos didžiausios -> departamento pavadinimas, alga
+* darbuotojus kurie niekad nebuvo departamento vadovais -> vardas, pavarde
+
+
+
+
+Sudėtingas *****:
+Tarkime turime lentele maršrutai su trimis laukais (mazgas nuo, mazgas iki ir atstumas tarp mazgu):
+nuo | iki | atstumas
+----+-----+---------
+A   | B   | 10
+A   | C   | 15
+B   | D   | 7
+B   | E   | 9
+D   | F   | 10
+C   | F   | 50
+D   | G   | 8
+C   | G   | 11
+suraskite galimus maršrutus iš A į F
+suraskite trumpiausią maršutą iš A į F
+
+
+
+
+/*
+1) Suraskite kokiu metų laiku (pavasarį, vasarą, rudenį ar žiemą) įdarbinta daugiausia žmonių
+*/
+SELECT CASE 
+	WHEN MONTH(hire_date) BETWEEN 3 AND 5 THEN 'pavasari' 
+	WHEN MONTH(hire_date) BETWEEN 6 AND 8 THEN 'vasara' 
+	WHEN MONTH(hire_date) BETWEEN 9 AND 11 THEN 'rudeni' 
+	ELSE 'ziema' END AS metu_laikas, 
+COUNT(hire_date) AS kiekis 
+FROM employees 
+GROUP BY metu_laikas 
+ORDER BY kiekis DESC;
+WITH zmones(season, count) AS (
+	SELECT 'winter', (SELECT COUNT(hire_date) FROM employees WHERE hire_date REGEXP '^....-(12|01|02)-..$')
+	UNION ALL
+	SELECT 'spring', (SELECT COUNT(hire_date) FROM employees WHERE hire_date REGEXP '-(03|04|05)-') -- 2020-03-25
+	UNION ALL 
+	SELECT 'summer', (SELECT COUNT(hire_date) FROM employees WHERE MONTH(hire_date) IN (6,7,8))
+	UNION ALL 
+	SELECT 'autumn', (SELECT COUNT(hire_date) FROM employees WHERE MONTH(hire_date) = 9 OR MONTH(hire_date) = 10 OR MONTH(hire_date) = 11)
+	)
+SELECT * FROM zmones ORDER BY count DESC;	
+/*
+2) Išveskite tris daugiausia progresavusius atlyginimo prasme žmones, 
+t.y. kurių pirmas ir paskutinis atlyginimai daugiausia skyrėsi
+- rasti datas kada zmogus gavo pirma ir paskutini atlyginimus
+- zmogus, pirmas, paskutinis
+*/
+SELECT A.*, s2.salary AS first_salary, s3.salary AS last_salary,
+	s3.salary - s2.salary AS diff_salary
+FROM
+	(SELECT emp_no, MIN(from_date) AS first_from_date, MAX(from_date) AS last_from_date FROM salaries
+	GROUP BY emp_no) A
+JOIN salaries s2 ON s2.emp_no = A.emp_no AND s2.from_date = A.first_from_date 
+JOIN salaries s3 ON s3.emp_no = A.emp_no AND s3.from_date = A.last_from_date 
+ORDER BY diff_salary DESC
+LIMIT 10;
+WITH sal (emp,s1,s2) AS (
+	SELECT emp_no, 
+		(SELECT salary FROM salaries WHERE salaries.emp_no = SOD.emp_no ORDER BY salaries.from_date LIMIT 1) AS s1, 
+        (SELECT salary FROM salaries WHERE salaries.emp_no = SOD.emp_no ORDER BY salaries.from_date DESC LIMIT 1) AS s2 
+	FROM salaries SOD 
+    ) 
+SELECT emp, (s2-s1) AS dis 
+FROM sal 
+ORDER BY dis DESC 
+LIMIT 1;
+SELECT DISTINCT emp_no,
+	(SELECT salary FROM salaries WHERE salaries.emp_no = SOD.emp_no order by salaries.from_date limit 1) AS s1, 
+	(SELECT salary FROM salaries WHERE salaries.emp_no = SOD.emp_no order by salaries.from_date desc limit 1) AS s2 
+FROM salaries SOD 
+ORDER BY emp_no
+LIMIT 20;
+/*
+3) Raskite žmogų kurio vienas iš atlyginimo pakeitimų buvo didžiausias 
+(pats pakeitimas buvo didžiausias, t.y. pvz anktesnis buvo 100, o dabar 150 
+ tai tada pakeitimas 50)
+ - [zmogus1]  d1  [d2] salary1
+ - [zmogus1] [d2]  d3 salary2
+ =  zmogus1 d1 d2 d3 salary1 salary2
+*/
+SELECT 
+    a.emp_no,
+    a.from_date,
+    a.salary AS salary_old,
+    b.from_date,
+    b.salary AS salary_new,
+    (b.salary - a.salary) AS skirtumas
+FROM salaries a
+JOIN salaries b ON b.emp_no = a.emp_no AND a.to_date = b.from_date 
+ORDER BY skirtumas DESC
+LIMIT 10;
+/* 
+	View'ai 
+*/
+SELECT * FROM current_dept_emp LIMIT 10;
+CREATE VIEW current_dept_emp AS 
+	SELECT l.emp_no AS emp_no, 
+		d.dept_no AS dept_no, 
+		l.from_date AS from_date,
+		l.to_date AS to_date 
+    FROM dept_emp d 
+    JOIN dept_emp_latest_date l 
+		ON (d.emp_no = l.emp_no) AND 
+			(d.from_date = l.from_date) AND 
+            (l.to_date = d.to_date);
