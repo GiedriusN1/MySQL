@@ -1,7 +1,9 @@
 Uždaviniai:
 1) Suraskite kokiu metų laiku (pavasarį, vasarą, rudenį ar žiemą) įdarbinta daugiausia žmonių
 2) Išveskite tris daugiausia progresavusius atlyginimo prasme žmones, t.y. kurių pirmas ir paskutinis atlyginimai daugiausia skyrėsi
-3) Raskite žmogų kurio vienas iš atlyginimo pakeitimų buvo didžiausias (pats pakeitimas buvo didžiausias, t.y. pvz anktesnis buvo 100, o dabar 150 tai tada pakeitimas 50)
+3) Raskite žmogų kurio vienas iš atlyginimo pakeitimų buvo didžiausias (pats pakeitimas buvo didžiausias, t.y. pvz anktesnis buvo 100,
+o dabar 150 tai tada pakeitimas 50)
+
 
 Sprendimas 1
 SELECT daugiausia_idarbinta
@@ -15,6 +17,24 @@ FROM employees
 GROUP BY daugiausia_idarbinta 
 ORDER BY kiekis DESC) selektas
 LIMIT 1;
+
+(galima daryti ir su funkcija ELT
+elt(MONTH(from_date),'Winter','Winter', 'Spring','Spring','Spring','Summer','Summer',
+                                                  'Summer','Autumn','Autumn','Autumn','Winter')
+						  
+trecias variantas
+						  
+CREATE TABLE test_table2 ( season varchar(10), hire_count int ); 
+INSERT INTO hire_by_season (season, hire_count) 
+VALUES ('winter', (SELECT COUNT(hire_date) FROM employees WHERE hire_date REGEXP '^....-(12|01|02)-..$')), 
+('spring', (SELECT COUNT(hire_date) FROM employees WHERE hire_date REGEXP '^....-(03|04|05)-..$')), 
+('summer', (SELECT COUNT(hire_date) FROM employees WHERE hire_date REGEXP '^....-(06|07|08)-..$')), 
+('autumn', (SELECT COUNT(hire_date) FROM employees WHERE hire_date REGEXP '^....-(09|10|11)-..$'))
+
+arba 
+
+
+
 
 Sprendimas 2
 a) lyginam pagal didziausio ir maziausio atlyginimu skirtuma (ne visiskai atitinka uzduoties salyga)
@@ -35,6 +55,16 @@ Gaunam:
 b) lyginam pagal dabartinio ir pirmo atlyginimu skirtuma
 tam reikia padaryti du tikrinimus
 
+
+Karolio
+with sal (emp,s1,s2) as( SELECT emp_no, 
+(SELECT salary FROM salaries 
+WHERE salaries.emp_no = SOD.emp_no order by salaries.from_date asc limit 1) AS s1, 
+(SELECT salary FROM salaries WHERE salaries.emp_no = SOD.emp_no order by salaries.from_date desc limit 1) AS s2 
+FROM salaries SOD group by SOD.emp_no) select emp, 
+(s2-s1) as dis from sal order by dis desc limit 1;
+
+Sprendimas 3:
 
 
 
