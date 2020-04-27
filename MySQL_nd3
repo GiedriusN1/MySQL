@@ -188,9 +188,11 @@ WITH RECURSIVE keliai (cur_path, cur_dest, tot_distance) AS (     -- susikuriam 
      -- ORDER BY tot_distance ASC LIMIT 1 
      -- ijungiam sia eilute jei norime tik trumpiausio kelio
        ;
-    
-    
-    
+
+Atsakymas:
+
+A -> C -> F	F	65
+A -> B -> D -> F	F	27
 
 
 ---------------------------------------
