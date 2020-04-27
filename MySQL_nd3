@@ -175,15 +175,15 @@ CREATE TABLE marsrutai (
     ('C', 'G', 11);
     
 WITH RECURSIVE keliai (cur_path, cur_dest, tot_distance) AS (     -- susikuriam laikina lentele "keliai"
-          SELECT CAST(nuo AS CHAR(20)), CAST(nuo AS CHAR(20)), 0 
+          SELECT CAST(nuo AS CHAR(20)), CAST(nuo AS CHAR(20)), 0  -- pradedam nuo A iki A ir su 0 atstumu
           FROM marsrutai 
           WHERE nuo = 'A'   
           UNION     
-          SELECT CONCAT(keliai.cur_path, ' -> ', marsrutai.iki), marsrutai.iki, keliai.tot_distance+marsrutai.atstumas        
+          SELECT CONCAT(keliai.cur_path, ' -=> ', marsrutai.iki), marsrutai.iki, keliai.tot_distance + marsrutai.atstumas        
           FROM keliai, marsrutai        
           WHERE keliai.cur_dest = marsrutai.nuo
-           AND  NOT FIND_IN_SET(marsrutai.iki, REPLACE(keliai.cur_path,' -> ',',') ) ) 
-       SELECT cur_path Kelias, cur_dest Iki, tot_distance Atstumas FROM keliai 
+		  AND  NOT FIND_IN_SET(marsrutai.iki, REPLACE(keliai.cur_path,' -> ',',') ) ) 
+       SELECT cur_path Kelias, cur_dest Iki, tot_distance Atstumas FROM keliai -- selektas isvedimui is laikinos lenteles
        WHERE cur_dest = 'F'        -- galima isjungti ir matysim visus kelius tarp mazgu
      -- ORDER BY tot_distance ASC LIMIT 1 
      -- ijungiam sia eilute jei norime tik trumpiausio kelio
