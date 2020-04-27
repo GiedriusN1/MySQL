@@ -155,6 +155,42 @@ suraskite trumpiausią maršutą iš A į F
 
 algoritmas:
 http://www.artfulsoftware.com/infotree/qrytip.php?id=766&m=0
+https://www.percona.com/blog/2020/02/13/introduction-to-mysql-8-0-recursive-common-table-expression-part-2/
+
+
+CREATE TABLE marsrutai (
+    nuo CHAR(1),
+    iki CHAR(1),
+    atstumas INT
+    );
+    
+    INSERT marsrutai VALUES
+    ('A', 'B', 10), 
+    ('A', 'C', 15),
+    ('B', 'D', 7),
+    ('B', 'E', 9),
+    ('D', 'F', 10),
+    ('C', 'F', 50),
+    ('D', 'G', 8),
+    ('C', 'G', 11);
+    
+WITH RECURSIVE keliai (cur_path, cur_dest, tot_distance) AS (     -- susikuriam laikina lentele "keliai"
+          SELECT CAST(nuo AS CHAR(20)), CAST(nuo AS CHAR(20)), 0 
+          FROM marsrutai 
+          WHERE nuo = 'A'   
+          UNION     
+          SELECT CONCAT(keliai.cur_path, ' -> ', marsrutai.iki), marsrutai.iki, keliai.tot_distance+marsrutai.atstumas        
+          FROM keliai, marsrutai        
+          WHERE keliai.cur_dest = marsrutai.nuo
+           AND  NOT FIND_IN_SET(marsrutai.iki, REPLACE(keliai.cur_path,' -> ',',') ) ) 
+       SELECT cur_path Kelias, cur_dest Iki, tot_distance Atstumas FROM keliai 
+       WHERE cur_dest = 'F'        -- galima isjungti ir matysim visus kelius tarp mazgu
+     -- ORDER BY tot_distance ASC LIMIT 1 
+     -- ijungiam sia eilute jei norime tik trumpiausio kelio
+       ;
+    
+    
+    
 
 
 ---------------------------------------
