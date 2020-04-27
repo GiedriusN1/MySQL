@@ -1,11 +1,87 @@
 Paprasti uždaviniai:
 Rasti:
 * kuriame departamente dabar dirba daugiausiai moterų -> departamento pavadinimas ir moterų skaičius
+Sprendimas A (visos moterys, neziurint kada dirbo):
+
+   SELECT  de.dept_no, d.dept_name, count(d.dept_no) Moteru
+   FROM
+    employees.employees e
+JOIN employees.dept_emp de
+	ON (e.emp_no = de.emp_no) 
+JOIN employees.departments d
+	ON (de.dept_no = d.dept_no)
+    WHERE
+  gender = 'F'
+GROUP BY d.dept_name  
+ORDER BY count(d.dept_no) DESC
+LIMIT 10 ;
+
+d005	Development		34258
+d004	Production		29549
+d007	Sales			20854
+d009	Customer Service	9448
+d008	Research		8439
+d006	Quality Management	8078
+d001	Marketing		8037
+d003	Human Resources		7075
+d002	Finance			7015
 
 
+Sprendimas B (dabar dirbancios moterys):
+
+   SELECT  de.dept_no, d.dept_name, count(d.dept_no) Moteru
+   FROM
+    employees.employees e
+JOIN employees.dept_emp de
+	ON (e.emp_no = de.emp_no) 
+JOIN employees.departments d
+	ON (de.dept_no = d.dept_no)
+    WHERE
+  gender = 'F' AND de.to_date = '9999-01-01'
+GROUP BY d.dept_name  
+ORDER BY count(d.dept_no) DESC
+LIMIT 10 ;
+
+d005	Development		24533
+d004	Production		21393
+d007	Sales			14999
+d009	Customer Service	7007
+d008	Research		6181
+d006	Quality Management	5872
+d001	Marketing		5864
+d003	Human Resources		5147
+d002	Finance			5014
 
 
 * kuriame departamente vis dar dirba vyriausias darbuotojas -> departamento pavadinimas, darbuotojo vardas, pavarde
+Sprendimas:
+
+SELECT  d.dept_name Departamentas, e.first_name Vardas, e.last_name Pavarde, e.birth_date Gimes
+   FROM
+    employees.employees e
+JOIN 
+employees.dept_emp de
+	ON (e.emp_no = de.emp_no) 
+    
+JOIN employees.departments d
+	ON (de.dept_no = d.dept_no)
+    WHERE
+  de.to_date = '9999-01-01'
+ORDER BY e.birth_date ASC
+LIMIT 10;
+
+Production		Moni	Decaestecker	1952-02-01
+Development		Kiyokazu	Whitcomb	1952-02-01
+Customer Service	Supot	Remmele		1952-02-01
+Human Resources		Jouni	Pocchiola	1952-02-01
+Production		Ronghao	Schaad		1952-02-01
+Research		Piyush	Erbe		1952-02-02
+Production		Kristof	Ranft		1952-02-02
+Development		Takahito	Maierhofer	1952-02-02
+Production		Fan	Przulj		1952-02-02
+Development		Tadahiro	Delgrange	1952-02-02
+
+
 * kuriame departamente algos didžiausios -> departamento pavadinimas, alga
 * darbuotojus kurie niekad nebuvo departamento vadovais -> vardas, pavarde
 
