@@ -82,8 +82,58 @@ Production		Fan	Przulj		1952-02-02
 Development		Tadahiro	Delgrange	1952-02-02
 
 
-* kuriame departamente algos didžiausios -> departamento pavadinimas, alga
+SELECT  d.dept_name Departamentas, e.first_name Vardas, e.last_name Pavarde, s.salary Atlyginimas, s.from_date 'Data'
+   FROM
+    employees.employees e
+JOIN employees.dept_emp de
+	ON (e.emp_no = de.emp_no) 
+JOIN employees.departments d
+	ON (de.dept_no = d.dept_no)
+JOIN employees.salaries s
+	ON (e.emp_no = s.emp_no)
+    WHERE
+  s.to_date = '9999-01-01'  ---- yra niuansu
+  ORDER BY s.salary DESC
+LIMIT 10;
+
+Sales	Tokuyasu	Pesch	158220	2002-03-22
+Sales	Honesty	Mukaidono	156286	2001-08-04
+Sales	Xiahua	Whitcomb	155709	2002-07-14
+Sales	Sanjai	Luders		155513	2002-04-11
+Sales	Tsutomu	Alameldin	155190	2002-02-11
+Sales	Willard	Baca		154459	2002-02-22
+Sales	Lidong	Meriste		154376	2002-05-05
+Sales	Charmane Griswold	153715	2001-10-09
+Sales	Weijing	Chenoweth	152710	2001-10-04
+Sales	Weicheng Hatcliff	152687	2002-04-08
+
+
 * darbuotojus kurie niekad nebuvo departamento vadovais -> vardas, pavarde
+
+Sprendimas paprsatuoju budu:
+
+-- SELECT first_name, last_name
+SELECT COUNT(*)
+FROM employees
+WHERE emp_no NOT IN (SELECT emp_no FROM dept_manager) 
+-- ORDER BY emp_no;
+   
+Ats:   COUNT =  300000
+
+Sprendimas su LEFT JOIN
+
+-- SELECT first_name, last_name
+SELECT COUNT(e.emp_no)
+FROM employees e
+LEFT JOIN dept_manager dm
+ON e.emp_no = dm.emp_no
+WHERE dm.emp_no IS NULL 
+-- ORDER BY e.emp_no;
+
+Ats:   COUNT =  300000
+
+LEFT ir RIGHT JOIN: 
+https://stackoverflow.com/questions/3308122/how-do-i-decide-when-to-use-right-joins-left-joins-or-inner-joins-or-how-to-dete/3308153#3308153
 
 
 
