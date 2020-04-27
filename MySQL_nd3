@@ -153,9 +153,11 @@ C   | G   | 11
 suraskite galimus maršrutus iš A į F
 suraskite trumpiausią maršutą iš A į F
 
+algoritmas:
+http://www.artfulsoftware.com/infotree/qrytip.php?id=766&m=0
 
 
-
+---------------------------------------
 /*
 1) Suraskite kokiu metų laiku (pavasarį, vasarą, rudenį ar žiemą) įdarbinta daugiausia žmonių
 */
