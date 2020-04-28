@@ -1,0 +1,58 @@
+
+CREATE TABLE marsrutai (
+	nuo CHAR(1),
+    iki CHAR(1),
+    atstumas INT
+    );
+DELETE FROM marsrutai;
+INSERT marsrutai VALUES
+	('A', 'B', 10), 		
+    ('A', 'C', 15),
+    ('B', 'D', 7),
+    ('B', 'E', 9),
+    ('D', 'F', 10),
+    ('C', 'F', 50),
+    ('D', 'G', 8),
+    ('C', 'G', 11);
+SELECT * FROM marsrutai;
+WITH m(nuo, iki, kelias, atstumas) AS (
+	SELECT p1.nuo, p1.iki, 
+		CONCAT(p1.nuo, '-', p1.iki), 
+        p1.atstumas 
+	FROM marsrutai p1
+    UNION
+    SELECT p1.nuo, p2.iki, 
+		CONCAT(p1.nuo, '-', p1.iki, '-', p2.iki), 
+		p1.atstumas + p2.atstumas 
+	FROM marsrutai p1
+    JOIN marsrutai p2 ON p1.iki = p2.nuo
+    UNION
+    SELECT p1.nuo, p3.iki, 
+		CONCAT(p1.nuo, '-', p1.iki, '-', p2.iki, '-', p3.iki), 
+        p1.atstumas + p2.atstumas + p3.atstumas
+	FROM marsrutai p1
+    JOIN marsrutai p2 ON p1.iki = p2.nuo
+    JOIN marsrutai p3 ON p2.iki = p3.nuo
+)
+SELECT * FROM m;
+
+
+-- o dabar pabandome padaryti su rekursija ***********************
+WITH RECURSIVE m(nuo, iki, kelias, mazgai, atstumas) AS (
+	SELECT p1.nuo, p1.iki, 
+		CAST(CONCAT(p1.nuo, '-', p1.iki) AS CHAR(100)) AS kelias,
+        JSON_ARRAY(p1.nuo, p1.iki) AS mazgai,
+        p1.atstumas 
+	FROM marsrutai p1
+    UNION
+    SELECT p1.nuo, p2.iki, 
+		CONCAT(p1.kelias, '-', p2.iki), 
+        JSON_ARRAY_APPEND(p1.mazgai, '$', p2.iki),
+		p1.atstumas + p2.atstumas 
+	FROM m p1
+    JOIN marsrutai p2 ON p1.iki = p2.nuo
+)
+SELECT * FROM m;
+-- kas atsitiks jei turesim ir toki dar irasa:
+-- ir kaip isspresti ta problema?
+INSERT marsrutai VALUES('D', 'A', 13); 
